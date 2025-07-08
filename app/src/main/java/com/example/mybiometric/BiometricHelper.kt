@@ -1,31 +1,36 @@
 package com.example.mybiometric
 
+import android.content.Context
 import androidx.biometric.BiometricPrompt
-import androidx.biometric.BiometricPrompt.AuthenticationCallback
-import androidx.biometric.BiometricPrompt.AuthenticationResult
-import androidx.fragment.app.FragmentActivity
-import java.util.concurrent.Executors
-import javax.crypto.Cipher
+import androidx.core.content.ContextCompat
 
-class BiometricHelper(private val activity: FragmentActivity) {
-  fun authenticate(cipher: Cipher, onSuccess: (Cipher) -> Unit, onError: (String) -> Unit) {
-    val biometricPrompt = BiometricPrompt(activity, Executors.newSingleThreadExecutor(),
-      object : AuthenticationCallback() {
-        override fun onAuthenticationSucceeded(result: AuthenticationResult) {
-          onSuccess(result.cryptoObject?.cipher!!)
+class BiometricHelper(private val context: Context) {
+
+  fun createPrompt(
+    title: String,
+    subtitle: String,
+    onSuccess: (BiometricPrompt.AuthenticationResult) -> Unit,
+    onError: (String) -> Unit
+  ): Pair<BiometricPrompt, BiometricPrompt.PromptInfo> {
+    val executor = ContextCompat.getMainExecutor(context)
+    val prompt = BiometricPrompt(
+      context as androidx.fragment.app.FragmentActivity, executor,
+      object : BiometricPrompt.AuthenticationCallback() {
+        override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+          onSuccess(result)
         }
 
-        override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+        override fun onAuthenticationError(code: Int, errString: CharSequence) {
           onError(errString.toString())
         }
       })
 
     val promptInfo = BiometricPrompt.PromptInfo.Builder()
-      .setTitle("Autentikasi Biometrik")
-      .setSubtitle("Gunakan fingerprint atau Face ID")
+      .setTitle(title)
+      .setSubtitle(subtitle)
       .setNegativeButtonText("Batal")
       .build()
 
-    biometricPrompt.authenticate(promptInfo, BiometricPrompt.CryptoObject(cipher))
+    return Pair(prompt, promptInfo)
   }
 }

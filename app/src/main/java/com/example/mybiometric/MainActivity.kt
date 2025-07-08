@@ -1,12 +1,14 @@
 package com.example.mybiometric
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyPermanentlyInvalidatedException
 import android.security.keystore.KeyProperties
 import android.util.Base64
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -77,6 +79,13 @@ class MainActivity : AppCompatActivity() {
         binding.btnGotoBio.setOnClickListener {
             startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS))
         }
+
+        binding.btnGotoNext.setOnClickListener {
+            startActivity(Intent(this, BiometricActivity::class.java))
+        }
+
+        binding.tvBuildNumber.text = "${Build.MANUFACTURER}, ${Build.MODEL}, ${Build.VERSION.SDK_INT}"
+//        Log.d("MainActivity", "Build Number: ${Build.MANUFACTURER} ${Build.MODEL}")
     }
 
     private fun isBiometricAvailable(): Boolean {
